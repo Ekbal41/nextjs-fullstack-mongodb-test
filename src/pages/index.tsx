@@ -3,57 +3,82 @@ import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import axios from 'axios'
 import { Cursor } from 'mongoose'
+import { useRouter } from 'next/router'
+import Link from 'next/link'
+import { resolve } from 'path'
+
 export default function Home() {
+  const router = useRouter();
   type User = {
     name: string
     age: string
   }
   const [info, seInfo] = useState<User[]>([])
 
+  const [create, setCreate] = useState(false)
+
   const [formData, setFormData] = useState<User>({
     name: '',
     age: '',
   })
 
-  const handleClick = async  () => {
+  const handleClick = async () => {
     const user = formData;
     setFormData({
-      name : '',
-      age : '',
+      name: '',
+      age: '',
     })
     await axios.post('http://localhost:3000/api/users', user)
-    .then(res => {
-     seInfo(res.data)
-      
-    })
-    .catch(err => {
-      console.log(err)
-    })
-    
+      .then(res => {
+        seInfo(res.data)
+
+      })
+      .catch(err => {
+        console.log(err)
+      })
+
 
   }
 
-  const deleteUser = async(username : string)=>{
-    await axios.delete(`http://localhost:3000/api/users/${username}`)
-    .then(res => {
-     seInfo(res.data)
-      
-    })
-    .catch(err => {
-      console.log(err)
-    })
+  if (info.length < 0) {
+    setCreate(false)
+  }
 
+  const deleteUser = async (username: string) => {
+    await axios.delete(`http://localhost:3000/api/users/${username}`)
+      .then(res => {
+        seInfo(res.data)
+
+      })
+      .catch(err => {
+        console.log(err)
+      })
+
+  }
+
+  const handleLogout = () => {
+    axios.get('http://localhost:3000/api/logout')
+      .then(res => {
+        console.log(res.data)
+
+        router.push('/login')
+        getData()
+
+      })
+      .catch(err => {
+        console.log(err)
+      })
   }
 
   const getData = async () => {
     console.log('getting data')
-   axios.get('http://localhost:3000/api/users')
-    .then(res => {
-      seInfo(res.data)
-    })
-    .catch(err => {
-      console.log(err)
-    })
+    axios.get('http://localhost:3000/api/users')
+      .then(res => {
+        seInfo(res.data)
+      })
+      .catch(err => {
+        console.log(err)
+      })
 
 
   }
@@ -61,8 +86,8 @@ export default function Home() {
   useEffect(() => {
     //fetch all data using fetch api
     getData()
-
   }, [])
+
 
 
 
@@ -76,32 +101,98 @@ export default function Home() {
 
       </Head>
       <main >
-        <div className="d-flex container mt-5 justify-content-evenly">
-        
-        <div>
+
+        <div className="navdiv">
+
           {
-            info.map((item, index) => {
-              return (
-                <div key={index} className="border border-primary rounded p-3 mb-3 " style={{
-                  cursor: 'pointer'
-                }}>
-                  <h1 className="text-uppercase text-primary" onClick={()=>{
-                    deleteUser(item.name)
-                  }}>{item.name}</h1>
-                  <p className="fs-1 fw-bold">{item.age}</p>
-                </div>
-              )
-            })
+            info.length > 0 ? (
+              <div >
+                <Link href="#" >
+                  <i className=" icon bi bi-person"></i>
+                </Link>
+                <p className="c-create" onClick={() => setCreate(!create)}>
+                  <i className="icon bi bi-pencil-square"></i>
+                </p>
+                <p className="c-create" onClick={handleLogout}>
+                  <i className="icon bi bi-door-open"></i>
+                </p>
+              </div>
+
+            ) : (
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                
+              }}>
+                <Link href="login" >
+                  <i className=" icon bi bi-door-closed"></i>
+                </Link>
+
+                <Link href="register" >
+                  <i className=" icon bi bi-person-plus"></i>
+                </Link>
+              </div>
+            )
           }
-        </div>
-        <div className="">
-          <h1 className="text-primary text-center text-uppercase mb-4">Add  User</h1>
-          <input className="form-control mb-4" type="text" placeholder="name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
-          <input className="form-control mb-4" type="text" placeholder="age" value={formData.age} onChange={(e) => setFormData({ ...formData, age: e.target.value })} />
-          <button className="btn btn-primary w-100 " onClick={handleClick}>Submit</button>
-        </div>
+
+
+
+
         </div>
 
+
+
+        <div className="d-flex container  justify-content-evenly"
+          style={{
+            marginTop: 120,
+          }}
+        >
+
+          <div className=" p-4 w-50" style={{
+            height: 450,
+            overflow: 'auto',
+          }}>
+            <div
+              className="mb-4 main fixed-top"
+              style={{
+                height: 70,
+
+              }}>
+              <h1 className=" py-2 text-white text-center text-uppercase mb-4">Notes📒</h1>
+            </div>
+
+
+            {
+
+              info.length > 0 ? info.map((item: any, index: any) => {
+                return (
+                  <div key={index} className=" p-3 mb-3 " style={{
+                    cursor: 'pointer'
+                  }}>
+                    <p className="text-capitalize text-primary fw-bold cur">{item.name}</p>
+                    <button onClick={() => {
+                      deleteUser(item.name)
+                    }} className="c-btn"><i className="bi bi-trash3"></i></button>
+                    <p className="cur ">{item.age}</p>
+                  </div>
+                )
+              }) : <p className="fs-5 cur">Please log in to show the notes...😔 </p>
+            }
+          </div>
+
+          {
+            create ? (
+              <div className="border border-primary p-4 rounded h-50">
+                <h1 className="text-primary text-center text-uppercase mb-4">😀</h1>
+                <input className="form-control mb-4" type="text" placeholder="Title" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
+                <textarea className="form-control mb-4" placeholder="Your Note ..." value={formData.age} onChange={(e) => setFormData({ ...formData, age: e.target.value })} />
+                <button className="btn btn-primary" onClick={handleClick}>Add Note</button>
+              </div>
+
+            ) : ''
+          }
+
+        </div>
       </main>
     </>
   )

@@ -3,7 +3,52 @@
   padding: 0;
   border: 0;
  box-sizing: border-box;
+ font-family: cursive;
 }
 body{
   background-color: aliceblue;
+  font-family: cursive;
+}
+
+::-webkit-scrollbar{
+  display: none;
+}
+.cur{
+  font-family: cursive;
+}
+.c-btn{
+  border: none;
+  color: red;
+  background-color: aliceblue;
+  float: right;
+  font-weight: bold;
+  margin-top: -40px;
+}
+
+.main{
+  background-color: #4582ec;
+}
+.c-create{
+  color: #4582ec;
+  margin: 0;
+
+}
+.cc-btn{
+  position: absolute;
+  left: 40px;
+  background-color: aliceblue;
+  color: #4582ec;
+  font-size: larger;
+  font-weight: bolder;
+}
+
+.navdiv{
+ 
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  left: 20px;
+}
+.icon{
+  font-size: 40px;
 }
